@@ -7,7 +7,7 @@ The program implements a simple CLI for graphical display of the simulation.
 
 ### Prerequisites
   - g++/c++ compiler
-  - Linux OS, tested on kernel ver. 5.17.6.
+  - Linux OS
 
 ### Running the program
    - Use `git clone` to receive the repository
