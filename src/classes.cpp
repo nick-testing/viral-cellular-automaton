@@ -1,8 +1,15 @@
 #include "classes.h"
+#include "viral_automaton.h"
 
-using namespace std;
+using std::vector, std::tuple, std::get;
 
-matrixData adj_mat[200][200];
+extern vector<Cell*> cell_array;    // vector that stores pointers to all occupied cells.
+extern int GEN_TO_IMMUNE;       // Generations until sick cells become immune
+extern int healthy_counter;
+extern int temp_sick_counter;    
+extern int immune_counter;    
+
+extern matrixData adj_mat[200][200];
 
 
 Cell::Cell(tuple<int, int> coor, int speed): location(coor), speed(speed){};
@@ -50,8 +57,6 @@ ImmuneCell::ImmuneCell(tuple<int, int> coor, int speed): Cell(coor, speed) {
  *  1 2 3
  *  4   5
  *  6 7 8  
- * @param radius proximity to neighbors
- * @return tuple
  */
 std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
     std::vector<std::tuple<int, int>> output;
@@ -173,7 +178,6 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
     return output;
 }
 
-
 /**
  * Performs one iteration step for the healthy cell that was called from.
  * @param index
@@ -208,7 +212,7 @@ void SickCell::next_iteration(int index) {
     int y = get<1>(location);
     // Freeing up current location, so that another cell can occupy it.
     free_cell(x, y);
-    if (generation < X) {
+    if (generation < GEN_TO_IMMUNE) {
         cell_array.at(index) = new SickCell(new_cell_coordinate, speed, generation + 1);
     } else {
         cell_array.at(index) = new ImmuneCell(new_cell_coordinate, speed);

@@ -43,5 +43,4 @@ struct matrixData {
     bool is_immune = false;
 };
 
-
 #endif // CLASSES_H
