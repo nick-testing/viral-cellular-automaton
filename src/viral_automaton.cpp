@@ -1,4 +1,39 @@
-#include "function_includes.h"
+#include "viral_automaton.h"
+#include <iostream>             /* cout */
+#include <random>               /* srand, rand */
+#include <time.h>               /* time */
+#include <vector>
+#include <tuple>
+#include <sstream>              
+#include <stdlib.h>
+#include <fstream>
+
+using std::vector, std::tuple, std::get, std::cin, std::cout, std::endl;
+
+// Global variable counters
+int N;                      // Total number of occupied cells
+double D = 0.002;           // Fraction of starting sick cells
+double R = 0.01;            // Fraction of fast moving cells
+int GEN_TO_IMMUNE = 2;      // Generations until sick cells become immune
+int P1 = 60;                // Probability (percentage) of people getting sick when not taking care
+int P2 = 5;                 // Probability (percentage) of people getting sick when taking care
+int T;                      // P1 to P2 threshold - 0.1 * N Default
+
+int temp_sick_counter;      // Will store mid-iteration sick number of each iteration.
+int sick_counter = 0;
+int healthy_counter = 0;
+int immune_counter = 0;
+
+matrixData adj_mat[200][200];
+
+std::random_device rd;
+
+vector<Cell*> cell_array; // vector that stores pointers to all occupied cells.
+
+// Output functions
+static void clear();
+static void print_matrix(matrixData adj_mat[200][200]);
+static void get_params();
 
 
 /**
@@ -103,7 +138,7 @@ void free_cell(int x, int y) {
 /**
  * Read and initialize automata parameters from user
  */
-void get_params() {
+static void get_params() {
     cout << "=========================================Viral Spread Automaton=========================================" <<
     endl << endl << endl <<
     "\033[1;41;37mNOTE: it is highly recommended to set the terminal font to 5 or lower, and the terminal size to at least 201x201 after parameter setup,\n"
@@ -169,9 +204,9 @@ void get_params() {
         if (cin.peek() == '\n') {
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            X = 2;
+            GEN_TO_IMMUNE = 2;
             break;
-        } else if (!(std::cin >> X) || (X < 1)) {
+        } else if (!(std::cin >> GEN_TO_IMMUNE) || (GEN_TO_IMMUNE < 1)) {
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             cout << "Invalid input, please try again." << endl;     //error handling
@@ -248,7 +283,7 @@ void get_params() {
 /**
  * Initialize matrix with sick, healthy and long distance cells
  */
-void initialize() {
+static void initialize() {
     int i = 0;
     int j = 0;
     int num_of_healthy =  N - N * D;
@@ -280,13 +315,13 @@ void initialize() {
 }
 
 // Deletes cell vector from memory
-void clear_memory(vector<Cell*> cellArray) {
+static void clear_memory(vector<Cell*> cellArray) {
     for (Cell* cell: cellArray) {
         delete cell;
     }
 }
 
-void execute() {
+static void execute() {
     clear();
     get_params();
     initialize();
@@ -329,196 +364,6 @@ int main() {
 }
 
 
-/*****************************************************************************
- ****************************** Object Functions *****************************
- *****************************************************************************/
-
-/**
- * Returns a vector containing neighbor coordinates for the current cell
- *  Neigbors of the middle cell are represented as:
- *  1 2 3
- *  4   5
- *  6 7 8  
- * @param radius proximity to neighbors
- * @return tuple
- */
-std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
-    std::vector<std::tuple<int, int>> output;
-    int x = get<0>(location);
-    int y = get<1>(location);
-       
-    if (x > radius && y > radius && x < 199 - radius && y < 199 - radius) {
-        output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));      // 1
-        output.push_back(tuple<int, int>(x - 1 - radius, y));                   // 2
-        output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));      // 3
-        output.push_back(tuple<int, int>(x, y - 1 - radius));                   // 4
-        output.push_back(tuple<int, int>(x, y + 1 + radius));                   // 5
-        output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));      // 6
-        output.push_back(tuple<int, int>(x + 1 + radius, y));                   // 7
-        output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));      // 8
-        return output;
-    }
-    else if (x <= radius && x >= 0) {
-        output.push_back(tuple<int, int>(199 - radius + x, y));              // 2
-        output.push_back(tuple<int, int>(x + 1 + radius, y));            // 7
-
-        // only top is wrapping
-        if (y > radius && y < 199 - radius){
-            output.push_back(tuple<int, int>(199 - radius + x, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(199 - radius + x, y + 1 +radius));  // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));    // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));    // 5
-            output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));    // 8
-            return output;
-        }
-
-        //top and right are wrapping
-        else if (y >= 199 - radius && y < 200) {
-            output.push_back(tuple<int, int>(199 - radius + x, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(199 - radius + x, radius - (199 - y)));      // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));    // 4
-            output.push_back(tuple<int, int>(x, radius - (199 - y)));        // 5
-            output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x + 1 + radius, radius - (199 - y)));        // 8
-            return output;
-        }
-
-            // top and left are wrapping.
-
-        else if (y <= radius && y >= 0) {
-            output.push_back(tuple<int, int>(199 - radius + x, 199 - radius + y));    // 1
-            output.push_back(tuple<int, int>(199 - radius + x, y + 1 + radius ));      // 3
-            output.push_back(tuple<int, int>(x, 199 - radius + y));      // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));        // 5
-            output.push_back(tuple<int, int>(x + 1 + radius, 199 - radius + y));      // 6
-            output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));        // 8
-            return output;
-        }
-    }
-    // bottom is wrapping
-    else if (x >= 199 - radius && x < 200) {
-        output.push_back(tuple<int, int>(x - 1 - radius, y));              // 2
-        output.push_back(tuple<int, int>(x - 199 + radius, y));                // 7
-
-        // only bottom row is wrapping
-        if (y > radius && y < 199 - radius) {
-            output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));  // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));    // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));    // 5
-            output.push_back(tuple<int, int>(x - 199 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x - 199 + radius, y + 1 + radius));    // 8
-            return output;
-        }
-
-        //bottom right is wrapping
-        else if (y >= 199 - radius && y < 200) {
-            output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(x - 1 - radius, y - 199 + radius));      // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));  // 4
-            output.push_back(tuple<int, int>(x, y - 199 + radius));      // 5
-            output.push_back(tuple<int, int>(x - 199 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x - 199 + radius, y - 199 + radius));        // 8
-            return output;
-        }
-
-            // bottom left is wrapping
-        else if (y <= radius && y >= 0) {
-            output.push_back(tuple<int, int>(x - 1 - radius, 199 - radius + y));    // 1
-            output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));  // 3
-            output.push_back(tuple<int, int>(x, 199 - radius + y));    // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));  // 5
-            output.push_back(tuple<int, int>(x - 199 + radius, 199 - radius + y));      // 6
-            output.push_back(tuple<int, int>(x - 199 + radius, y + 1 + radius));        // 8
-            return output;
-        }
-    }
-    // only left is wrapping
-    else if (y <= radius  && y >= 0) {
-        output.push_back(tuple<int, int>(x - 1 - radius, 199 - radius + y));      // 1
-        output.push_back(tuple<int, int>(x - 1 - radius, y));           // 2
-        output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));   // 3
-        output.push_back(tuple<int, int>(x, 199 - radius + y));             // 4
-        output.push_back(tuple<int, int>(x, y + 1 + radius));            // 5
-        output.push_back(tuple<int, int>(x + 1 + radius, 199 - radius + y));      // 6
-        output.push_back(tuple<int, int>(x + 1 + radius, y));            // 7
-        output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));     // 8
-        return output;
-    }
-    // only right is wrapping
-    else if (y >= 199 - radius && y < 200) {
-        output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));      // 1
-        output.push_back(tuple<int, int>(x - 1 - radius, y));           // 2
-        output.push_back(tuple<int, int>(x - 1 - radius, y - 199 + radius));   // 3
-        output.push_back(tuple<int, int>(x, y - 1 - radius));             // 4
-        output.push_back(tuple<int, int>(x, y - 199 + radius));            // 5
-        output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));      // 6
-        output.push_back(tuple<int, int>(x + 1 + radius, y));            // 7
-        output.push_back(tuple<int, int>(x + 1 + radius, y - 199 + radius));     // 8
-        return output;
-    } else
-        output.push_back(get_random_coordinates());
-    return output;
-}
-
-
-/**
- * Performs one iteration step for the healthy cell that was called from.
- * @param index
- */
-void HealthyCell::next_iteration(int index) {
-    int x = get<0>(location);
-    int y = get<1>(location);
-
-    bool sick_next_iteration = is_cell_sick(this);
-    auto all_neighbor_coordinates = get_neighbours(speed);
-    auto new_cell_coordinate = choose_random_neighbor(all_neighbor_coordinates, location);
-
-    // Freeing up current location, so that another cell can occupy it.
-    free_cell(x, y);
-    // create a new Healthy cell
-    if (!sick_next_iteration) {
-        cell_array.at(index) = new HealthyCell(new_cell_coordinate, speed);
-    }
-    // Create a new sick cell
-    else {
-        healthy_counter--;
-        temp_sick_counter++;
-        cell_array.at(index) = new SickCell(new_cell_coordinate, speed);
-    }
-    delete this;
-}
-
-void SickCell::next_iteration(int index) {
-    auto all_neighbor_coordinates = get_neighbours(speed);
-    auto new_cell_coordinate = choose_random_neighbor(all_neighbor_coordinates, location);
-    int x = get<0>(location);
-    int y = get<1>(location);
-    // Freeing up current location, so that another cell can occupy it.
-    free_cell(x, y);
-    if (generation < X) {
-        cell_array.at(index) = new SickCell(new_cell_coordinate, speed, generation + 1);
-    } else {
-        cell_array.at(index) = new ImmuneCell(new_cell_coordinate, speed);
-        temp_sick_counter--;
-        immune_counter++;
-    }
-    delete this;
-}
-
-void ImmuneCell::next_iteration(int index) {
-    auto all_neighbor_coordinates = get_neighbours(speed);
-    auto new_cell_coordinate = choose_random_neighbor(all_neighbor_coordinates, location);
-    int x = get<0>(location);
-    int y = get<1>(location);
-    // Freeing up current location, so that another cell can occupy it.
-    free_cell(x, y);
-    cell_array.at(index) = new ImmuneCell(new_cell_coordinate, speed);
-    delete this;
-}
-
-
 
 /****************************************************************************
  ****************************** Console Output ******************************
@@ -527,7 +372,7 @@ void ImmuneCell::next_iteration(int index) {
 /**
  * Clears the console display
  */
-void clear() {
+static void clear() {
 #if defined _WIN32
     system("cls");
 #elif defined (__LINUX__) || defined(__gnu_linux__) || defined(__linux__) || defined (__APPLE__)
@@ -536,8 +381,7 @@ void clear() {
 #endif
 }
 
-
-void print_matrix(matrixData adj_mat[200][200]) {
+static void print_matrix(matrixData adj_mat[200][200]) {
     int i = 0, j = 0;
     //iterate over rows
     for (;i < 200; ++i) {
