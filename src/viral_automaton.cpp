@@ -11,34 +11,28 @@
 using std::vector, std::tuple, std::get, std::cin, std::cout, std::endl;
 
 // Global variable counters
-int N;                      // Total number of occupied cells
-double D = 0.002;           // Fraction of starting sick cells
-double R = 0.01;            // Fraction of fast moving cells
-int GEN_TO_IMMUNE = 2;      // Generations until sick cells become immune
-int P1 = 60;                // Probability (percentage) of people getting sick when not taking care
-int P2 = 5;                 // Probability (percentage) of people getting sick when taking care
-int T;                      // P1 to P2 threshold - 0.1 * N Default
+static int N = 30000;               // Total number of occupied cells
+static double D = 0.002;            // Fraction of starting sick cells
+static double R = 0.01;             // Fraction of fast moving cells
+static int P1 = 60;                 // Probability (percentage) of people getting sick when not taking care
+static int P2 = 5;                  // Probability (percentage) of people getting sick when taking care
+static int T;                       // P1 to P2 threshold - 0.1 * N Default
+static int sick_counter = 0;
 
-int temp_sick_counter;      // Will store mid-iteration sick number of each iteration.
-int sick_counter = 0;
+static std::random_device rd;
+
+/* Externally accessible variables */
+int temp_sick_counter = 0;          // Will store mid-iteration sick number of each iteration.
 int healthy_counter = 0;
 int immune_counter = 0;
+int GEN_TO_IMMUNE = 2;              // Generations until sick cells become immune
+
+vector<Cell*> cell_array;           // vector that stores pointers to all occupied cells.
 
 matrixData adj_mat[200][200];
 
-std::random_device rd;
-
-vector<Cell*> cell_array; // vector that stores pointers to all occupied cells.
-
-// Output functions
-static void clear();
-static void print_matrix(matrixData adj_mat[200][200]);
-static void get_params();
-
-
 /**
  * Checks for free cells on the grid, returns a random (x, y) coordinate as a tuple.
- * @return
  */
 tuple<int, int> get_random_coordinates() {
     int x;
@@ -56,8 +50,7 @@ tuple<int, int> get_random_coordinates() {
 }
 
 /*
- * Rolls whether a cell is sick in the next iteration
- * Uses
+ * Selects based on a given probability whether a cell is sick in the next iteration
  */
 bool is_cell_sick(Cell* cell) {
     // Create a uniform distribution number generator
@@ -101,10 +94,7 @@ bool is_cell_sick(Cell* cell) {
  * @return new coordinates
  */
 tuple<int,int> choose_random_neighbor(vector<tuple<int, int>> all_neighbor_coordinates,
-                                    tuple<int, int> self_coordinate) {
-    // Create a uniform distribution number generator
-
-
+                                      tuple<int, int> self_coordinate) {     
     vector<tuple<int, int>> free_spaces;
     free_spaces.push_back(self_coordinate);
     int i = 1;
@@ -116,8 +106,10 @@ tuple<int,int> choose_random_neighbor(vector<tuple<int, int>> all_neighbor_coord
             free_spaces.push_back(neighbor_coordinate);
         }
     }
+
+    // Create a uniform distribution number generator
     std::uniform_int_distribution<int> distribution(0, i - 1);
-    std::mt19937 engine(rd()); // Mersenne twister MT19937
+    std::mt19937 engine(rd());
     int choice = distribution(engine);
     return free_spaces.at(choice);
 }
@@ -136,13 +128,18 @@ void free_cell(int x, int y) {
 }
 
 /**
- * Read and initialize automata parameters from user
+ * Read and initialize automata parameters interactively
  */
 static void get_params() {
-    cout << "=========================================Viral Spread Automaton=========================================" <<
-    endl << endl << endl <<
-    "\033[1;41;37mNOTE: it is highly recommended to set the terminal font to 5 or lower, and the terminal size to at least 201x201 after parameter setup,\n"
-                    "in order to better see the whole simulation.\033[0m"  << endl << endl;
+    cout << "=========================================Viral Spread Automaton"
+            "=========================================" 
+        <<  endl << endl 
+        <<  "\033[1;41;37mNOTE: after parameter setup, it is highly recommended to set the terminal"
+        <<  endl
+        <<  "font size to 5 or lower, and the terminal size to at least 201x201"
+        <<  endl
+        <<  "in order to see the whole simulation.\033[0m"
+        <<  endl << endl;
 
     while(true) {
         cout << "Enter desired number of cells, maximum of 40000 [Default = 30000]: ";
@@ -150,7 +147,6 @@ static void get_params() {
         if (cin.peek() == '\n') {
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            N = 30000;
             break;
         } else if (!(std::cin >> N) || N > 40000 || N < 2) {
             cin.clear();
@@ -217,7 +213,8 @@ static void get_params() {
         }
     }
     while(true) {
-        cout << "Enter probability of infection in percents(1 - 100) when number of sick cells is low [Default = 60]: ";
+        cout << "Enter precentile probability of infection(values 1 - 100)"
+                " when number of sick cells is low [Default = 60]: ";
         //check if next character is newline
         if (cin.peek() == '\n') {
             cin.clear();
@@ -235,7 +232,8 @@ static void get_params() {
         }
     }
     while(true) {
-        cout << "Enter probability of infection in percents(1 - 100) when number of sick high [Default = 5]: ";
+        cout << "Enter percentile probability of infection( values 1 - 100)"
+                " when number of sick cells is high [Default = 5]: ";
         //check if next character is newline
         if (cin.peek() == '\n') {
             cin.clear();
@@ -254,7 +252,8 @@ static void get_params() {
     }
     double x;
     while(true) {
-        cout << "Enter sick cell threshold before cell infection percentage drops, values should be between 0.0-1.0 [Default = 0.1]: ";
+        cout << "Enter sick cell threshold before cell infection percentage drops,"
+                        " values should be between 0.0-1.0 [Default = 0.1]: ";
         //check if next character is newline
         if (cin.peek() == '\n') {
             cin.clear();
@@ -279,6 +278,45 @@ static void get_params() {
         return;
     }
 }
+
+/****************************************************************************
+ ****************************** Console Output ******************************
+ ****************************************************************************/
+
+/**
+ * Clears the console display
+ */
+static void clear() {
+    #if defined _WIN32
+    system("cls");
+    #elif defined (__LINUX__) || defined(__gnu_linux__) || defined(__linux__) || defined (__APPLE__)
+    system("clear");
+    #endif
+}
+
+static void print_matrix(matrixData adj_mat[200][200]) {
+    int i = 0, j = 0;
+    //iterate over rows
+    for (;i < 200; ++i) {
+        //iterate over columns
+        for (j = 0; j < 200; ++j) {
+            if (!adj_mat[i][j].is_occupied)
+                cout <<"_";
+            else if (adj_mat[i][j].is_occupied && adj_mat[i][j].is_healthy)
+               cout <<"\033[1;47;35mH\033[0m";
+            else if (adj_mat[i][j].is_occupied && adj_mat[i][j].is_sick)
+                cout <<"\033[1;41;37mS\033[0m";
+            else if (adj_mat[i][j].is_occupied && adj_mat[i][j].is_immune)
+                cout << "\033[1;104;30mI\033[0m";
+        }
+        cout << endl;
+    }
+    //leave matrix on the screen for a couple of seconds
+}
+
+/****************************************************************************
+ ************************** Execution Functions *****************************
+ ****************************************************************************/
 
 /**
  * Initialize matrix with sick, healthy and long distance cells
@@ -356,47 +394,8 @@ static void execute() {
     cout << endl << "Results were written to results.csv" << endl;
 }
 
-
 int main() {
     srand(time(NULL));
     execute();
     clear_memory(cell_array);
-}
-
-
-
-/****************************************************************************
- ****************************** Console Output ******************************
- ****************************************************************************/
-
-/**
- * Clears the console display
- */
-static void clear() {
-#if defined _WIN32
-    system("cls");
-#elif defined (__LINUX__) || defined(__gnu_linux__) || defined(__linux__) || defined (__APPLE__)
-    system("clear");
-    //std::cout<< u8"\033[2J\033[1;1H"; //Using ANSI Escape Sequence
-#endif
-}
-
-static void print_matrix(matrixData adj_mat[200][200]) {
-    int i = 0, j = 0;
-    //iterate over rows
-    for (;i < 200; ++i) {
-        //iterate over columns
-        for (j = 0; j < 200; ++j) {
-            if (!adj_mat[i][j].is_occupied)
-                cout <<"_";
-            else if (adj_mat[i][j].is_occupied && adj_mat[i][j].is_healthy)
-               cout <<"\033[1;47;35mH\033[0m";
-            else if (adj_mat[i][j].is_occupied && adj_mat[i][j].is_sick)
-                cout <<"\033[1;41;37mS\033[0m";
-            else if (adj_mat[i][j].is_occupied && adj_mat[i][j].is_immune)
-                cout << "\033[1;104;30mI\033[0m";
-        }
-        cout << endl;
-    }
-    //leave matrix on the screen for a couple of seconds
 }
