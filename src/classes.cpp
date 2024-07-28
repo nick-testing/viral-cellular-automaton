@@ -88,7 +88,6 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));    // 8
             return output;
         }
-
         //top and right are wrapping
         else if (y >= 199 - radius && y < 200) {
             output.push_back(tuple<int, int>(199 - radius + x, y - 1 - radius));  // 1
@@ -99,9 +98,7 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             output.push_back(tuple<int, int>(x + 1 + radius, radius - (199 - y)));        // 8
             return output;
         }
-
-            // top and left are wrapping.
-
+        // top and left are wrapping.
         else if (y <= radius && y >= 0) {
             output.push_back(tuple<int, int>(199 - radius + x, 199 - radius + y));    // 1
             output.push_back(tuple<int, int>(199 - radius + x, y + 1 + radius ));      // 3
@@ -115,7 +112,7 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
     // bottom is wrapping
     else if (x >= 199 - radius && x < 200) {
         output.push_back(tuple<int, int>(x - 1 - radius, y));              // 2
-        output.push_back(tuple<int, int>(x - 199 + radius, y));                // 7
+        output.push_back(tuple<int, int>(x - 199 + radius, y));            // 7
 
         // only bottom row is wrapping
         if (y > radius && y < 199 - radius) {
@@ -127,7 +124,6 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             output.push_back(tuple<int, int>(x - 199 + radius, y + 1 + radius));    // 8
             return output;
         }
-
         //bottom right is wrapping
         else if (y >= 199 - radius && y < 200) {
             output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));  // 1
@@ -138,8 +134,7 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             output.push_back(tuple<int, int>(x - 199 + radius, y - 199 + radius));        // 8
             return output;
         }
-
-            // bottom left is wrapping
+        // bottom left is wrapping
         else if (y <= radius && y >= 0) {
             output.push_back(tuple<int, int>(x - 1 - radius, 199 - radius + y));    // 1
             output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));  // 3
@@ -178,9 +173,6 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
     return output;
 }
 
-/**
- * Performs one iteration step for the healthy cell that was called from.
- */
 void HealthyCell::next_iteration(int index) {
     int x = get<0>(location);
     int y = get<1>(location);
@@ -189,7 +181,7 @@ void HealthyCell::next_iteration(int index) {
     auto all_neighbor_coordinates = get_neighbours(speed);
     auto new_cell_coordinate = choose_random_neighbor(all_neighbor_coordinates, location);
 
-    // Freeing up current location, so that another cell can occupy it.
+    // Free up current location, so that another cell can occupy it.
     free_cell(x, y);
     // create a new Healthy cell
     if (!sick_next_iteration) {
