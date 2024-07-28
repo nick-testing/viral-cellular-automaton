@@ -12,8 +12,6 @@ extern matrixData adj_mat[200][200];
 
 extern vector<Cell*> cell_array;    
 
-
-
 Cell::Cell(tuple<int, int> coor, int speed): location(coor), speed(speed){};
 
 HealthyCell::HealthyCell(tuple<int, int> coor, int speed): Cell(coor, speed) {
@@ -182,7 +180,6 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
 
 /**
  * Performs one iteration step for the healthy cell that was called from.
- * @param index
  */
 void HealthyCell::next_iteration(int index) {
     int x = get<0>(location);
