@@ -234,4 +234,3 @@ void ImmuneCell::next_iteration(int index) {
     cell_array.at(index) = new ImmuneCell(new_cell_coordinate, speed);
     delete this;
 }
-
