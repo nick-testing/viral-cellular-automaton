@@ -3,13 +3,15 @@
 
 using std::vector, std::tuple, std::get;
 
-extern vector<Cell*> cell_array;    // vector that stores pointers to all occupied cells.
-extern int GEN_TO_IMMUNE;       // Generations until sick cells become immune
+extern int GEN_TO_IMMUNE;       
 extern int healthy_counter;
 extern int temp_sick_counter;    
 extern int immune_counter;    
 
 extern matrixData adj_mat[200][200];
+
+extern vector<Cell*> cell_array;    
+
 
 
 Cell::Cell(tuple<int, int> coor, int speed): location(coor), speed(speed){};
