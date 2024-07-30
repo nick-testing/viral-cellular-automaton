@@ -2,10 +2,9 @@
 #include <iostream>             /* cout */
 #include <random>               /* srand, rand */
 #include <time.h>               /* time */
-#include <vector>
-#include <tuple>
-#include <sstream>              
-#include <stdlib.h>
+#include <vector>               /* vector */
+#include <tuple>                /* tuple */
+#include <unistd.h>             /* sleep */              
 #include <fstream>
 
 using std::vector, std::tuple, std::get, std::cin, std::cout, std::endl;
@@ -22,14 +21,14 @@ static int sick_counter = 0;
 static std::random_device rd;
 
 /* Externally accessible variables */
-int temp_sick_counter = 0;          // Will store mid-iteration sick number of each iteration.
-int healthy_counter = 0;
-int immune_counter = 0;
-int GEN_TO_IMMUNE = 2;              // Generations until sick cells become immune
+int _tmp_sick_counter = 0;          // Will store mid-iteration sick number of each iteration.
+int _healthy_counter = 0;
+int _immune_counter = 0;
+int _gen_to_immune = 2;             // Generations until sick cells become immune
 
 vector<Cell*> cell_array;           // vector that stores pointers to all occupied cells.
 
-matrixData adj_mat[200][200];
+matrixData adj_mat[MATRIX_SIZE][MATRIX_SIZE];
 
 /**
  * Checks for free cells on the grid, returns a random (x, y) coordinate as a tuple.
@@ -200,9 +199,9 @@ static void get_params() {
         if (cin.peek() == '\n') {
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            GEN_TO_IMMUNE = 2;
+            _gen_to_immune = 2;
             break;
-        } else if (!(std::cin >> GEN_TO_IMMUNE) || (GEN_TO_IMMUNE < 1)) {
+        } else if (!(std::cin >> _gen_to_immune) || (_gen_to_immune < 1)) {
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             cout << "Invalid input, please try again." << endl;     //error handling
@@ -294,12 +293,12 @@ static void clear() {
     #endif
 }
 
-static void print_matrix(matrixData adj_mat[200][200]) {
+static void print_matrix(matrixData adj_mat[MATRIX_SIZE][MATRIX_SIZE]) {
     int i = 0, j = 0;
     //iterate over rows
-    for (;i < 200; ++i) {
+    for (;i < MATRIX_SIZE; ++i) {
         //iterate over columns
-        for (j = 0; j < 200; ++j) {
+        for (j = 0; j < MATRIX_SIZE; ++j) {
             if (!adj_mat[i][j].is_occupied)
                 cout <<"_";
             else if (adj_mat[i][j].is_occupied && adj_mat[i][j].is_healthy)
@@ -312,6 +311,7 @@ static void print_matrix(matrixData adj_mat[200][200]) {
         cout << endl;
     }
     //leave matrix on the screen for a couple of seconds
+    usleep(200000);
 }
 
 /****************************************************************************
@@ -338,7 +338,7 @@ static void initialize() {
             cell_array.push_back(new HealthyCell(coor, 9));
         }
     }
-    healthy_counter = num_of_healthy; // initial number of healthy
+    _healthy_counter = num_of_healthy; // initial number of healthy
     int numSick = N - num_of_healthy;
     sick_counter = numSick; // initial counter of sick
     // Loop initializing sick
@@ -359,7 +359,8 @@ static void clear_memory(vector<Cell*> cellArray) {
     }
 }
 
-static void execute() {
+void execute() {
+    srand(time(NULL));
     clear();
     get_params();
     initialize();
@@ -374,10 +375,9 @@ static void execute() {
         cout << "\033[3;43;30mIteration\033[0m ";
         printf("\033[3;43;30m%d\033[0m\n", i);
         print_matrix(adj_mat);
-        temp_sick_counter = sick_counter;
+        _tmp_sick_counter = sick_counter;
 
-        //cout << healthy_counter << "," << sick_counter << "," << immune_counter << endl;
-        output_file << healthy_counter << "," << sick_counter << "," << immune_counter << endl;
+        output_file << _healthy_counter << "," << sick_counter << "," << _immune_counter << endl;
 
         if (sick_counter > 0) {
             // Iterate over each and every cell in the cell vector, advancing one cell at a time,
@@ -388,14 +388,9 @@ static void execute() {
             }
         } else
             break;
-        sick_counter = temp_sick_counter; // update sick_counter with new value
+        sick_counter = _tmp_sick_counter; // update sick_counter with new value
     }
     output_file.close();
     cout << endl << "Results were written to results.csv" << endl;
-}
-
-int main() {
-    srand(time(NULL));
-    execute();
     clear_memory(cell_array);
 }
