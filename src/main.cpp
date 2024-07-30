@@ -1,4 +1,4 @@
-#include "viral_automaton.h"
+extern void execute();
 
 int main() {
     execute();
