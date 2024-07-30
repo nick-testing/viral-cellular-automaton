@@ -333,7 +333,7 @@ static void initialize() {
     int fast_healthy_cells = rand() % fast_cells;
     int fast_sick_cells = fast_cells - fast_healthy_cells;
     // Loop initializing healthy
-    for (i; i < num_of_healthy; ++i) {
+    for (; i < num_of_healthy; ++i) {
         auto coor = get_random_coordinates();
         if (i > fast_healthy_cells) {
             cell_array.push_back(new HealthyCell(coor, 0));
@@ -345,7 +345,7 @@ static void initialize() {
     int numSick = N - num_of_healthy;
     sick_counter = numSick; // initial counter of sick
     // Loop initializing sick
-    for (j; j < numSick; ++j) {
+    for (; j < numSick; ++j) {
         auto coor = get_random_coordinates();
         if (j > fast_sick_cells) {
             cell_array.push_back(new SickCell(coor, 0));
@@ -372,7 +372,7 @@ void execute() {
     int j = 0;
     std::ofstream output_file("results.csv");
     output_file << "Healthy,Sick,Immune" << endl;
-    for (i; i < iteration; ++i) {
+    for (; i < iteration; ++i) {
         j = 0;
         clear();
         cout << "\033[3;43;30mIteration\033[0m ";
