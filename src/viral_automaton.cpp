@@ -95,8 +95,8 @@ bool is_cell_sick(Cell* cell) {
  * @param self_coordinate tuple representing current point's coordinates
  * @return new coordinates
  */
-tuple<int,int> choose_random_neighbor(vector<tuple<int, int>> all_neighbor_coordinates,
-                                      tuple<int, int> self_coordinate) {     
+tuple<int,int> choose_random_neighbor(vector<tuple<int, int>>& all_neighbor_coordinates,
+                                      tuple<int, int>& self_coordinate) {     
     vector<tuple<int, int>> free_spaces;
     free_spaces.push_back(self_coordinate);
     int i = 1;
