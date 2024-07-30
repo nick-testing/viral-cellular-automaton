@@ -3,12 +3,12 @@
 
 using std::vector, std::tuple, std::get;
 
-extern int GEN_TO_IMMUNE;       
-extern int healthy_counter;
-extern int temp_sick_counter;    
-extern int immune_counter;    
+extern int _gen_to_immune;       
+extern int _healthy_counter;
+extern int _tmp_sick_counter;    
+extern int _immune_counter;    
 
-extern matrixData adj_mat[200][200];
+extern matrixData adj_mat[MATRIX_SIZE][MATRIX_SIZE];
 
 extern vector<Cell*> cell_array;    
 
@@ -63,7 +63,7 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
     int x = get<0>(location);
     int y = get<1>(location);
        
-    if (x > radius && y > radius && x < 199 - radius && y < 199 - radius) {
+    if (x > radius && y > radius && x < (MATRIX_SIZE - 1) - radius && y < (MATRIX_SIZE - 1) - radius) {
         output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));      // 1
         output.push_back(tuple<int, int>(x - 1 - radius, y));                   // 2
         output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));      // 3
@@ -75,98 +75,98 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
         return output;
     }
     else if (x <= radius && x >= 0) {
-        output.push_back(tuple<int, int>(199 - radius + x, y));              // 2
-        output.push_back(tuple<int, int>(x + 1 + radius, y));            // 7
+        output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y));   // 2
+        output.push_back(tuple<int, int>(x + 1 + radius, y));                   // 7
 
         // only top is wrapping
-        if (y > radius && y < 199 - radius){
-            output.push_back(tuple<int, int>(199 - radius + x, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(199 - radius + x, y + 1 +radius));  // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));    // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));    // 5
-            output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));    // 8
+        if (y > radius && y < (MATRIX_SIZE - 1) - radius){
+            output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y - 1 - radius));  // 1
+            output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y + 1 +radius));   // 3
+            output.push_back(tuple<int, int>(x, y - 1 - radius));                               // 4
+            output.push_back(tuple<int, int>(x, y + 1 + radius));                               // 5
+            output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));                  // 6
+            output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));                  // 8
             return output;
         }
         //top and right are wrapping
-        else if (y >= 199 - radius && y < 200) {
-            output.push_back(tuple<int, int>(199 - radius + x, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(199 - radius + x, radius - (199 - y)));      // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));    // 4
-            output.push_back(tuple<int, int>(x, radius - (199 - y)));        // 5
-            output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x + 1 + radius, radius - (199 - y)));        // 8
+        else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) {
+            output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y - 1 - radius));                     // 1
+            output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, radius - ((MATRIX_SIZE - 1) - y)));   // 3
+            output.push_back(tuple<int, int>(x, y - 1 - radius));                                                  // 4
+            output.push_back(tuple<int, int>(x, radius - ((MATRIX_SIZE - 1) - y)));                                // 5
+            output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));                                     // 6
+            output.push_back(tuple<int, int>(x + 1 + radius, radius - ((MATRIX_SIZE - 1) - y)));                   // 8
             return output;
         }
         // top and left are wrapping.
         else if (y <= radius && y >= 0) {
-            output.push_back(tuple<int, int>(199 - radius + x, 199 - radius + y));    // 1
-            output.push_back(tuple<int, int>(199 - radius + x, y + 1 + radius ));      // 3
-            output.push_back(tuple<int, int>(x, 199 - radius + y));      // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));        // 5
-            output.push_back(tuple<int, int>(x + 1 + radius, 199 - radius + y));      // 6
-            output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));        // 8
+            output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, (MATRIX_SIZE - 1) - radius + y));  // 1
+            output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y + 1 + radius ));                 // 3
+            output.push_back(tuple<int, int>(x, (MATRIX_SIZE - 1) - radius + y));                               // 4
+            output.push_back(tuple<int, int>(x, y + 1 + radius));                                               // 5
+            output.push_back(tuple<int, int>(x + 1 + radius, (MATRIX_SIZE - 1) - radius + y));                  // 6
+            output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));                                  // 8
             return output;
         }
     }
     // bottom is wrapping
-    else if (x >= 199 - radius && x < 200) {
-        output.push_back(tuple<int, int>(x - 1 - radius, y));              // 2
-        output.push_back(tuple<int, int>(x - 199 + radius, y));            // 7
+    else if (x >= (MATRIX_SIZE - 1) - radius && x < MATRIX_SIZE) {
+        output.push_back(tuple<int, int>(x - 1 - radius, y));                                   // 2
+        output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, y));                   // 7
 
         // only bottom row is wrapping
-        if (y > radius && y < 199 - radius) {
-            output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));  // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));    // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));    // 5
-            output.push_back(tuple<int, int>(x - 199 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x - 199 + radius, y + 1 + radius));    // 8
+        if (y > radius && y < (MATRIX_SIZE - 1) - radius) {
+            output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));                  // 1
+            output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));                  // 3
+            output.push_back(tuple<int, int>(x, y - 1 - radius));                               // 4
+            output.push_back(tuple<int, int>(x, y + 1 + radius));                               // 5
+            output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, y - 1 - radius));  // 6
+            output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, y + 1 + radius));  // 8
             return output;
         }
         //bottom right is wrapping
-        else if (y >= 199 - radius && y < 200) {
-            output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));  // 1
-            output.push_back(tuple<int, int>(x - 1 - radius, y - 199 + radius));      // 3
-            output.push_back(tuple<int, int>(x, y - 1 - radius));  // 4
-            output.push_back(tuple<int, int>(x, y - 199 + radius));      // 5
-            output.push_back(tuple<int, int>(x - 199 + radius, y - 1 - radius));    // 6
-            output.push_back(tuple<int, int>(x - 199 + radius, y - 199 + radius));        // 8
+        else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) {
+            output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));                                  // 1
+            output.push_back(tuple<int, int>(x - 1 - radius, y - (MATRIX_SIZE - 1) + radius));                  // 3
+            output.push_back(tuple<int, int>(x, y - 1 - radius));                                               // 4
+            output.push_back(tuple<int, int>(x, y - (MATRIX_SIZE - 1) + radius));                               // 5
+            output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, y - 1 - radius));                  // 6
+            output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, y - (MATRIX_SIZE - 1) + radius));  // 8
             return output;
         }
         // bottom left is wrapping
         else if (y <= radius && y >= 0) {
-            output.push_back(tuple<int, int>(x - 1 - radius, 199 - radius + y));    // 1
-            output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));  // 3
-            output.push_back(tuple<int, int>(x, 199 - radius + y));    // 4
-            output.push_back(tuple<int, int>(x, y + 1 + radius));  // 5
-            output.push_back(tuple<int, int>(x - 199 + radius, 199 - radius + y));      // 6
-            output.push_back(tuple<int, int>(x - 199 + radius, y + 1 + radius));        // 8
+            output.push_back(tuple<int, int>(x - 1 - radius, (MATRIX_SIZE - 1) - radius + y));                  // 1
+            output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));                                  // 3
+            output.push_back(tuple<int, int>(x, (MATRIX_SIZE - 1) - radius + y));                               // 4
+            output.push_back(tuple<int, int>(x, y + 1 + radius));                                               // 5
+            output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, (MATRIX_SIZE - 1) - radius + y));  // 6
+            output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, y + 1 + radius));                  // 8
             return output;
         }
     }
     // only left is wrapping
     else if (y <= radius  && y >= 0) {
-        output.push_back(tuple<int, int>(x - 1 - radius, 199 - radius + y));      // 1
-        output.push_back(tuple<int, int>(x - 1 - radius, y));           // 2
-        output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));   // 3
-        output.push_back(tuple<int, int>(x, 199 - radius + y));             // 4
-        output.push_back(tuple<int, int>(x, y + 1 + radius));            // 5
-        output.push_back(tuple<int, int>(x + 1 + radius, 199 - radius + y));      // 6
-        output.push_back(tuple<int, int>(x + 1 + radius, y));            // 7
-        output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));     // 8
+        output.push_back(tuple<int, int>(x - 1 - radius, (MATRIX_SIZE - 1) - radius + y));  // 1
+        output.push_back(tuple<int, int>(x - 1 - radius, y));                               // 2
+        output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));                  // 3
+        output.push_back(tuple<int, int>(x, (MATRIX_SIZE - 1) - radius + y));               // 4
+        output.push_back(tuple<int, int>(x, y + 1 + radius));                               // 5
+        output.push_back(tuple<int, int>(x + 1 + radius, (MATRIX_SIZE - 1) - radius + y));  // 6
+        output.push_back(tuple<int, int>(x + 1 + radius, y));                               // 7
+        output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));                  // 8
         return output;
     }
     // only right is wrapping
-    else if (y >= 199 - radius && y < 200) {
-        output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));      // 1
-        output.push_back(tuple<int, int>(x - 1 - radius, y));           // 2
-        output.push_back(tuple<int, int>(x - 1 - radius, y - 199 + radius));   // 3
-        output.push_back(tuple<int, int>(x, y - 1 - radius));             // 4
-        output.push_back(tuple<int, int>(x, y - 199 + radius));            // 5
-        output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));      // 6
-        output.push_back(tuple<int, int>(x + 1 + radius, y));            // 7
-        output.push_back(tuple<int, int>(x + 1 + radius, y - 199 + radius));     // 8
+    else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) {
+        output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));                  // 1
+        output.push_back(tuple<int, int>(x - 1 - radius, y));                               // 2
+        output.push_back(tuple<int, int>(x - 1 - radius, y - (MATRIX_SIZE - 1) + radius));  // 3
+        output.push_back(tuple<int, int>(x, y - 1 - radius));                               // 4
+        output.push_back(tuple<int, int>(x, y - (MATRIX_SIZE - 1) + radius));               // 5
+        output.push_back(tuple<int, int>(x + 1 + radius, y - 1 - radius));                  // 6
+        output.push_back(tuple<int, int>(x + 1 + radius, y));                               // 7
+        output.push_back(tuple<int, int>(x + 1 + radius, y - (MATRIX_SIZE - 1) + radius));  // 8
         return output;
     } else
         output.push_back(get_random_coordinates());
@@ -189,8 +189,8 @@ void HealthyCell::next_iteration(int index) {
     }
     // Create a new sick cell
     else {
-        healthy_counter--;
-        temp_sick_counter++;
+        _healthy_counter--;
+        _tmp_sick_counter++;
         cell_array.at(index) = new SickCell(new_cell_coordinate, speed);
     }
     delete this;
@@ -203,12 +203,12 @@ void SickCell::next_iteration(int index) {
     int y = get<1>(location);
     // Freeing up current location, so that another cell can occupy it.
     free_cell(x, y);
-    if (generation < GEN_TO_IMMUNE) {
+    if (generation < _gen_to_immune) {
         cell_array.at(index) = new SickCell(new_cell_coordinate, speed, generation + 1);
     } else {
         cell_array.at(index) = new ImmuneCell(new_cell_coordinate, speed);
-        temp_sick_counter--;
-        immune_counter++;
+        _tmp_sick_counter--;
+        _immune_counter++;
     }
     delete this;
 }
