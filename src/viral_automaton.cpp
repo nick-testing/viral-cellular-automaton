@@ -9,12 +9,15 @@
 
 using std::vector, std::tuple, std::get, std::cin, std::cout, std::endl;
 
+#define SLEEP_TIME 200000
+
+
 // Global variable counters
 static int N = 30000;               // Total number of occupied cells
 static double D = 0.002;            // Fraction of starting sick cells
 static double R = 0.01;             // Fraction of fast moving cells
-static int P1 = 60;                 // Probability (percentage) of people getting sick when not taking care
-static int P2 = 5;                  // Probability (percentage) of people getting sick when taking care
+static int P1 = 60;                 // Probability (percentage) of people getting sick when hygiene is not maintained
+static int P2 = 5;                  // Probability (percentage) of people getting sick when hygiene is maintained
 static int T;                       // P1 to P2 threshold - 0.1 * N Default
 static int sick_counter = 0;
 
@@ -311,7 +314,7 @@ static void print_matrix(matrixData adj_mat[MATRIX_SIZE][MATRIX_SIZE]) {
         cout << endl;
     }
     //leave matrix on the screen for a couple of seconds
-    usleep(200000);
+    usleep(SLEEP_TIME);
 }
 
 /****************************************************************************
