@@ -1,5 +1,5 @@
 # Virus Spread Simulation Cellular Automaton
-A program simulating a viral outbreak and resembling [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) written in C++.
+A cellular automaton simulating a viral outbreak similar to [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
 
 The program allows interactive parameter tweaking (such as starting number of cells, infection rates etc.) on startup.
 
