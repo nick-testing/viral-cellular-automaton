@@ -13,24 +13,20 @@ extern matrixData adj_mat[MATRIX_SIZE][MATRIX_SIZE];
 extern vector<Cell*> cell_array;    
 
 Cell::Cell(const tuple<int, int>& coor, int speed)
-: location(coor), 
-  speed(speed)
-{
-};
+    :location(coor), 
+     speed(speed) {}
 
 HealthyCell::HealthyCell(const tuple<int, int>& coor, int speed)
-: Cell(coor, speed) 
-{
+    :Cell(coor, speed) {
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
     adj_mat[x][y].is_occupied = true;
     adj_mat[x][y].is_healthy = true;
-};
+}
 
 SickCell::SickCell(const tuple<int, int>& coor, int speed)
-: Cell(coor, speed)
-{
+    :Cell(coor, speed) {
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
@@ -39,9 +35,8 @@ SickCell::SickCell(const tuple<int, int>& coor, int speed)
 };
 
 SickCell::SickCell(const tuple<int, int>& coor, int speed, int gen)
-: Cell(coor, speed),
-  generation(gen)
-{
+    :Cell(coor, speed),
+     generation(gen) {
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
@@ -50,8 +45,7 @@ SickCell::SickCell(const tuple<int, int>& coor, int speed, int gen)
 };
 
 ImmuneCell::ImmuneCell(const tuple<int, int>& coor, int speed)
-: Cell(coor, speed) 
-{
+    :Cell(coor, speed) {
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
