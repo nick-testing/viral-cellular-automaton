@@ -13,11 +13,12 @@ extern matrixData adj_mat[MATRIX_SIZE][MATRIX_SIZE];
 extern vector<Cell*> cell_array;    
 
 Cell::Cell(const tuple<int, int>& coor, int speed)
-    :location(coor), 
-     speed(speed) {}
+    :location(coor), speed(speed) 
+    {}
 
 HealthyCell::HealthyCell(const tuple<int, int>& coor, int speed)
-    :Cell(coor, speed) {
+    :Cell(coor, speed) 
+{
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
@@ -26,7 +27,8 @@ HealthyCell::HealthyCell(const tuple<int, int>& coor, int speed)
 }
 
 SickCell::SickCell(const tuple<int, int>& coor, int speed)
-    :Cell(coor, speed) {
+    :Cell(coor, speed) 
+{
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
@@ -35,8 +37,8 @@ SickCell::SickCell(const tuple<int, int>& coor, int speed)
 };
 
 SickCell::SickCell(const tuple<int, int>& coor, int speed, int gen)
-    :Cell(coor, speed),
-     generation(gen) {
+    :Cell(coor, speed), generation(gen) 
+{
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
@@ -45,7 +47,8 @@ SickCell::SickCell(const tuple<int, int>& coor, int speed, int gen)
 };
 
 ImmuneCell::ImmuneCell(const tuple<int, int>& coor, int speed)
-    :Cell(coor, speed) {
+    :Cell(coor, speed) 
+{
     int x = get<0>(coor);
     int y = get<1>(coor);
     adj_mat[x][y].cell = this;
@@ -65,12 +68,14 @@ ImmuneCell::ImmuneCell(const tuple<int, int>& coor, int speed)
  *  4   5
  *  6 7 8  
  */
-std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
+std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) 
+{
     std::vector<std::tuple<int, int>> output;
     int x = get<0>(location);
     int y = get<1>(location);
        
-    if (x > radius && y > radius && x < (MATRIX_SIZE - 1) - radius && y < (MATRIX_SIZE - 1) - radius) {
+    if (x > radius && y > radius && x < (MATRIX_SIZE - 1) - radius && y < (MATRIX_SIZE - 1) - radius) 
+    {
         output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));      // 1
         output.push_back(tuple<int, int>(x - 1 - radius, y));                   // 2
         output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));      // 3
@@ -81,12 +86,14 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
         output.push_back(tuple<int, int>(x + 1 + radius, y + 1 + radius));      // 8
         return output;
     }
-    else if (x <= radius && x >= 0) {
+    else if (x <= radius && x >= 0) 
+    {
         output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y));   // 2
         output.push_back(tuple<int, int>(x + 1 + radius, y));                   // 7
 
         // only top is wrapping
-        if (y > radius && y < (MATRIX_SIZE - 1) - radius){
+        if (y > radius && y < (MATRIX_SIZE - 1) - radius)
+        {
             output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y - 1 - radius));  // 1
             output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y + 1 +radius));   // 3
             output.push_back(tuple<int, int>(x, y - 1 - radius));                               // 4
@@ -96,7 +103,8 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             return output;
         }
         //top and right are wrapping
-        else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) {
+        else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) 
+        {
             output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y - 1 - radius));                     // 1
             output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, radius - ((MATRIX_SIZE - 1) - y)));   // 3
             output.push_back(tuple<int, int>(x, y - 1 - radius));                                                  // 4
@@ -106,7 +114,8 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             return output;
         }
         // top and left are wrapping.
-        else if (y <= radius && y >= 0) {
+        else if (y <= radius && y >= 0) 
+        {
             output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, (MATRIX_SIZE - 1) - radius + y));  // 1
             output.push_back(tuple<int, int>((MATRIX_SIZE - 1) - radius + x, y + 1 + radius ));                 // 3
             output.push_back(tuple<int, int>(x, (MATRIX_SIZE - 1) - radius + y));                               // 4
@@ -117,7 +126,8 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
         }
     }
     // bottom is wrapping
-    else if (x >= (MATRIX_SIZE - 1) - radius && x < MATRIX_SIZE) {
+    else if (x >= (MATRIX_SIZE - 1) - radius && x < MATRIX_SIZE) 
+    {
         output.push_back(tuple<int, int>(x - 1 - radius, y));                                   // 2
         output.push_back(tuple<int, int>(x - (MATRIX_SIZE - 1) + radius, y));                   // 7
 
@@ -132,7 +142,8 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             return output;
         }
         //bottom right is wrapping
-        else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) {
+        else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) 
+        {
             output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));                                  // 1
             output.push_back(tuple<int, int>(x - 1 - radius, y - (MATRIX_SIZE - 1) + radius));                  // 3
             output.push_back(tuple<int, int>(x, y - 1 - radius));                                               // 4
@@ -142,7 +153,8 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
             return output;
         }
         // bottom left is wrapping
-        else if (y <= radius && y >= 0) {
+        else if (y <= radius && y >= 0) 
+        {
             output.push_back(tuple<int, int>(x - 1 - radius, (MATRIX_SIZE - 1) - radius + y));                  // 1
             output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));                                  // 3
             output.push_back(tuple<int, int>(x, (MATRIX_SIZE - 1) - radius + y));                               // 4
@@ -153,7 +165,8 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
         }
     }
     // only left is wrapping
-    else if (y <= radius  && y >= 0) {
+    else if (y <= radius  && y >= 0) 
+    {
         output.push_back(tuple<int, int>(x - 1 - radius, (MATRIX_SIZE - 1) - radius + y));  // 1
         output.push_back(tuple<int, int>(x - 1 - radius, y));                               // 2
         output.push_back(tuple<int, int>(x - 1 - radius, y + 1 + radius));                  // 3
@@ -165,7 +178,8 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
         return output;
     }
     // only right is wrapping
-    else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) {
+    else if (y >= (MATRIX_SIZE - 1) - radius && y < MATRIX_SIZE) 
+    {
         output.push_back(tuple<int, int>(x - 1 - radius, y - 1 - radius));                  // 1
         output.push_back(tuple<int, int>(x - 1 - radius, y));                               // 2
         output.push_back(tuple<int, int>(x - 1 - radius, y - (MATRIX_SIZE - 1) + radius));  // 3
@@ -175,12 +189,16 @@ std::vector<std::tuple<int, int>> Cell::get_neighbours(int radius) {
         output.push_back(tuple<int, int>(x + 1 + radius, y));                               // 7
         output.push_back(tuple<int, int>(x + 1 + radius, y - (MATRIX_SIZE - 1) + radius));  // 8
         return output;
-    } else
+    } 
+    else
+    {
         output.push_back(get_random_coordinates());
+    }
     return output;
 }
 
-void HealthyCell::next_iteration(int index) {
+void HealthyCell::next_iteration(int index) 
+{
     int x = get<0>(location);
     int y = get<1>(location);
 
@@ -191,11 +209,13 @@ void HealthyCell::next_iteration(int index) {
     // Free up current location, so that another cell can occupy it.
     free_cell(x, y);
     // create a new Healthy cell
-    if (!sick_next_iteration) {
+    if (!sick_next_iteration) 
+    {
         cell_array.at(index) = new HealthyCell(new_cell_coordinate, speed);
     }
     // Create a new sick cell
-    else {
+    else 
+    {
         _healthy_counter--;
         _tmp_sick_counter++;
         cell_array.at(index) = new SickCell(new_cell_coordinate, speed);
@@ -203,16 +223,20 @@ void HealthyCell::next_iteration(int index) {
     delete this;
 }
 
-void SickCell::next_iteration(int index) {
+void SickCell::next_iteration(int index) 
+{
     auto all_neighbor_coordinates = get_neighbours(speed);
     auto new_cell_coordinate = choose_random_neighbor(all_neighbor_coordinates, location);
     int x = get<0>(location);
     int y = get<1>(location);
     // Freeing up current location, so that another cell can occupy it.
     free_cell(x, y);
-    if (generation < _gen_to_immune) {
+    if (generation < _gen_to_immune) 
+    {
         cell_array.at(index) = new SickCell(new_cell_coordinate, speed, generation + 1);
-    } else {
+    } 
+    else 
+    {
         cell_array.at(index) = new ImmuneCell(new_cell_coordinate, speed);
         _tmp_sick_counter--;
         _immune_counter++;
@@ -220,7 +244,8 @@ void SickCell::next_iteration(int index) {
     delete this;
 }
 
-void ImmuneCell::next_iteration(int index) {
+void ImmuneCell::next_iteration(int index) 
+{
     auto all_neighbor_coordinates = get_neighbours(speed);
     auto new_cell_coordinate = choose_random_neighbor(all_neighbor_coordinates, location);
     int x = get<0>(location);

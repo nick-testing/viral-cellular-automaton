@@ -1,5 +1,6 @@
 extern void execute();
 
-int main() {
+int main() 
+{
     execute();
 }

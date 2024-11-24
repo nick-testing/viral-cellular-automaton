@@ -4,7 +4,8 @@
 #include <vector>
 #include <tuple>
 
-class Cell {
+class Cell 
+{
 public:
     std::tuple<int, int> location;
     int speed;
@@ -13,14 +14,16 @@ public:
     virtual void next_iteration(int index)=0;
 };
 
-class HealthyCell : public Cell {
+class HealthyCell : public Cell 
+{
 public:
     HealthyCell(const std::tuple<int, int>& coor, int speed);
     void next_iteration(int index) override;
 
 };
 
-class SickCell : public Cell{
+class SickCell : public Cell
+{
     int generation = 1;
 public:
     SickCell(const std::tuple<int, int>& coor, int speed);
@@ -28,14 +31,16 @@ public:
     void next_iteration(int index) override;
 };
 
-class ImmuneCell : public Cell {
+class ImmuneCell : public Cell 
+{
 public:
     ImmuneCell(const std::tuple<int, int>& coor, int speed);
     void next_iteration(int index) override;
 
 };
 
-struct matrixData {
+struct matrixData 
+{
     Cell* cell = nullptr;
     bool is_occupied = false;
     bool is_healthy = false;
